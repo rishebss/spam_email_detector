@@ -1,0 +1,232 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>spam detection page</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/swiper/swiper-bundle.min.css" rel='stylesheet'>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+<style>
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #111927;
+    background-image:
+        radial-gradient(at 47% 33%, hsl(235.70, 44%, 25%) 0, transparent 59%),
+        radial-gradient(at 82% 65%, hsl(218.00, 39%, 11%) 0, transparent 55%);
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        padding:30px;
+
+
+    }
+    @font-face {
+    font-family: myfont;
+    src: url("{% static 'Geometos.ttf' %}") format('truetype');
+}
+
+    .container {
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        background-color: rgba(17, 25, 40, 0.75);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.125);
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        width: 100%;
+
+    }
+
+    textarea {
+        width: 100%;
+        height: 150px;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        resize: none;
+        margin-bottom: 20px;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        background-color: rgba(0, 0, 0, 0.2);
+        color: white;
+    }
+
+    button {
+        background-color: #534caf;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 100%;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+
+        border-radius: 10px;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background-color: #111010;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 400px;
+        text-align: center;
+        color:white;
+        margin-top:100px;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        margin-left: 22rem;
+        margin-top: -8px;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: rgb(224, 21, 21);
+        text-decoration: none;
+        cursor: pointer;
+    }
+    @media (max-width: 768px) {
+        .container {
+            padding: 20px;
+        }
+
+        button {
+            font-size: 14px;
+        }
+
+        textarea {
+            height: 120px;
+            font-size: 14px;
+        }
+
+        .modal-content {
+            margin: 10% auto;
+            padding: 20px;
+        }
+
+        .close {
+            font-size: 24px;
+            margin-left: 18rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 15px;
+        }
+
+        button {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        textarea {
+            height: 100px;
+            font-size: 12px;
+        }
+
+        .modal-content {
+            padding: 20px;
+        }
+
+        .close {
+            font-size: 22px;
+            margin-left: 15rem;
+
+        }
+    }
+
+
+</style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center text-secondary" style="font-family: myfont;margin-bottom:20px;font-size:26px;">EMAIL SPAM DETECTOR</h1><br>
+
+    <form method="POST">
+        {% csrf_token %}
+        <textarea name="email_text" placeholder="Enter email text here"></textarea>
+        <button type="submit" id="submitBtn">Check for Spam</button>
+    </form>
+</div>
+
+<!-- Modal Structure -->
+<div id="resultModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <p id="resultText"></p>
+    </div>
+</div>
+
+<!-- JavaScript to handle the popup -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById("resultModal");
+        const resultText = document.getElementById("resultText");
+        const closeBtn = document.querySelector(".close");
+
+        // Capture the result from Django and display it
+        const result = "{{ result|escapejs }}";
+
+        if (result) {
+            resultText.innerText = "Content is: " + result;
+            modal.style.display = "block";
+        }
+
+        // Close the modal when the user clicks on the close button
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Close the modal if the user clicks anywhere outside of the modal
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    });
+</script>
+<script src="https://unpkg.com/flickity@2/dist/flickity.pkgd.min.js"></script>
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
